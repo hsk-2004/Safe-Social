@@ -4,6 +4,8 @@ import React, { useState } from 'react';
 import { Send, Loader2, RefreshCw } from 'lucide-react';
 import { analyzeToxicity } from '../services/toxicity';
 import { ResultBadge } from './ResultBadge';
+import { MOCK_POSTS } from '../data/posts';
+import { ToxicityResponse } from '../types';
 
 interface CommentBoxProps {
   onAddComment: (text: string, isToxic: boolean, score: number) => void;
@@ -12,7 +14,7 @@ interface CommentBoxProps {
 export const CommentBox: React.FC<CommentBoxProps> = ({ onAddComment }) => {
   const [comment, setComment] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [result, setResult] = useState<{ prediction: 'Toxic' | 'Safe'; score: number } | null>(null);
+  const [result, setResult] = useState<ToxicityResponse | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,11 +24,14 @@ export const CommentBox: React.FC<CommentBoxProps> = ({ onAddComment }) => {
     setResult(null);
 
     try {
-      const response = await analyzeToxicity(comment);
-      setResult(response);
+      // Gather user's history from mock data
+      const userHistory = MOCK_POSTS
+        .flatMap(p => p.comments)
+        .filter(c => c.username === 'xhskx')
+        .map(c => c.text);
 
-      // We only add the comment if it's safe, or maybe we add it with a warning?
-      // For this app, let's keep it in the "analyzed" state before final submission
+      const response = await analyzeToxicity(comment, userHistory);
+      setResult(response);
     } catch (error) {
       console.error(error);
     } finally {
@@ -81,13 +86,55 @@ export const CommentBox: React.FC<CommentBoxProps> = ({ onAddComment }) => {
             </button>
           </div>
           
+          {result.classification && (
+            <div className={`text-[10px] font-bold uppercase tracking-widest mb-1 ${
+              result.classification.is_constructive ? 'text-emerald-600' : 'text-rose-600'
+            }`}>
+              {result.classification.type}
+            </div>
+          )}
+
           <p className={`text-xs mb-3 ${
             result.prediction === 'Toxic' ? 'text-rose-600 font-medium' : 'text-emerald-600 font-medium'
           }`}>
             {result.prediction === 'Toxic' 
-              ? '⚠️ This comment may be harmful. Consider rewriting in a respectful way.' 
-              : '✅ This comment looks safe to post.'}
+              ? (result.classification?.is_constructive 
+                  ? '⚠️ Critical but constructive. Try to soften the delivery.' 
+                  : '❌ Destructive comment detected. This will be flagged.')
+              : '✅ This comment looks safe and helpful.'}
           </p>
+
+          {/* AI Explanation & Raw Scores */}
+          <div className="bg-white/50 rounded-lg p-3 border border-slate-100 mb-3 space-y-2">
+            <div className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex justify-between items-center">
+              <span>Model Confidence Breakdown</span>
+              <span className="bg-slate-100 text-slate-600 px-1 rounded">Raw Inference</span>
+            </div>
+            <div className="flex gap-4">
+              {result.raw_output?.map((out: any, i: number) => (
+                <div key={i} className="flex-1 flex flex-col">
+                  <span className="text-[10px] font-bold text-slate-600 capitalize">{out.label}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full ${out.label === 'toxic' ? 'bg-rose-400' : 'bg-emerald-400'}`} 
+                        style={{ width: `${out.score * 100}%` }}
+                      ></div>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="text-[10px] font-mono font-bold text-slate-400">{(out.score * 100).toFixed(2)}%</span>
+                      <span className="text-[7px] font-mono text-slate-300">Raw: {out.score.toFixed(6)}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {result.classification?.reasoning && (
+              <div className="mt-2 text-[10px] text-slate-500 leading-relaxed border-t border-slate-50 pt-2">
+                <span className="font-bold text-slate-700">AI Reasoning:</span> {result.classification.reasoning}
+              </div>
+            )}
+          </div>
 
           <button
             onClick={confirmPost}

@@ -21,4 +21,11 @@ export interface Post {
 export interface ToxicityResponse {
   prediction: 'Toxic' | 'Safe';
   score: number;
+  classification?: {
+    type: string;
+    is_constructive: boolean;
+    impact_score: number;
+    reasoning?: string;
+  };
+  raw_output?: any;
 }

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal } from 'lucide-react';
 import { Post, Comment } from '../types';
 import { CommentBox } from './CommentBox';
@@ -60,16 +61,16 @@ export const PostCard: React.FC<PostCardProps> = ({ post, priority = false }) =>
       </div>
 
       {/* Post Image */}
-      <div className="relative aspect-square w-full bg-slate-100 overflow-hidden">
+      <Link href={`/post/${post.id}`} className="relative aspect-square w-full bg-slate-100 overflow-hidden block">
         <Image
           src={post.image}
           alt="Post content"
           fill
           priority={priority}
           sizes="(max-width: 768px) 100vw, 448px"
-          className="object-cover"
+          className="object-cover hover:scale-105 transition-transform duration-700"
         />
-      </div>
+      </Link>
 
       {/* Interactions */}
       <div className="p-4">
@@ -81,9 +82,9 @@ export const PostCard: React.FC<PostCardProps> = ({ post, priority = false }) =>
             >
               <Heart className={`w-6 h-6 ${isLiked ? 'fill-current' : ''}`} />
             </button>
-            <button className="text-slate-700 hover:text-slate-400">
+            <Link href={`/post/${post.id}`} className="text-slate-700 hover:text-slate-400">
               <MessageCircle className="w-6 h-6" />
-            </button>
+            </Link>
             <button className="text-slate-700 hover:text-slate-400">
               <Send className="w-6 h-6" />
             </button>

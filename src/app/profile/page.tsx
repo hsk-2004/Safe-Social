@@ -1,13 +1,16 @@
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 import { MOCK_POSTS } from '@/data/posts';
 import { Grid, Bookmark, User, Settings, MapPin, Link as LinkIcon } from 'lucide-react';
 
 export default function ProfilePage() {
+  const userPosts = MOCK_POSTS.filter(p => p.username === 'xhskx');
+
   // Simulate user statistics
   const stats = {
-    posts: MOCK_POSTS.length,
+    posts: userPosts.length,
     followers: '12.4K',
     following: '842'
   };
@@ -104,8 +107,8 @@ export default function ProfilePage() {
 
           {/* Posts Grid */}
           <div className="grid grid-cols-3 gap-0.5 md:gap-8 py-8">
-            {MOCK_POSTS.map((post) => (
-              <div key={post.id} className="relative aspect-square group cursor-pointer overflow-hidden rounded-md md:rounded-xl">
+            {userPosts.map((post) => (
+              <Link key={post.id} href={`/post/${post.id}`} className="relative aspect-square group cursor-pointer overflow-hidden rounded-md md:rounded-xl">
                 <Image
                   src={post.image}
                   alt={post.caption}
@@ -121,7 +124,7 @@ export default function ProfilePage() {
                     <span>💬</span> {post.comments.length}
                   </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>

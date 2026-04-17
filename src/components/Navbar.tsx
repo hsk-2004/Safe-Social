@@ -1,7 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Home, Search, PlusSquare, Heart, Camera } from 'lucide-react';
+import { Home, Search, PlusSquare, Heart, Camera, BarChart3 } from 'lucide-react';
 
 export const Navbar = () => {
   return (
@@ -21,6 +21,9 @@ export const Navbar = () => {
           <Search className="w-6 h-6 text-slate-900 cursor-pointer hidden sm:block" />
           <PlusSquare className="w-6 h-6 text-slate-900 cursor-pointer" />
           <Heart className="w-6 h-6 text-slate-900 cursor-pointer" />
+          <Link href="/dashboard">
+            <BarChart3 className="w-6 h-6 text-slate-900 cursor-pointer hover:text-indigo-600 transition-colors" />
+          </Link>
           <Link href="/profile">
             <div className="w-7 h-7 rounded-full bg-slate-200 border border-slate-300 cursor-pointer hover:ring-2 ring-indigo-500 ring-offset-2 transition-all overflow-hidden relative">
               <Image 
